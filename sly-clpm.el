@@ -39,7 +39,8 @@
   '(("clpm install context" . sly-clpm-install-context)
     ("clpm active context" . sly-clpm-active-contex)
     ("clpm activate bundle context" . sly-clpm-activate-context)
-    ("clpm activate global context" . sly-clpm-activate-globale-context)))
+    ("clpm activate global context" . sly-clpm-activate-globale-context)
+    ("clpm install from source" . sly-clpm-install-from-source)))
 
 (define-sly-contrib sly-clpm
   "CLPM system support"
@@ -60,7 +61,6 @@ CLPMFILE must be path to a non existing clpmfile and ASD is a list containing
 .asd files. Typically project root '(<projectname>.asd <projectname>-test.asd)."
   ;; TODO: Detect project .asd files automagically
   (interactive (list (expand-file-name (read-file-name "Path to clpmfile: " nil nil t))
-
                      (let (tags tag)
                        (while (file-regular-p
                                      (setq tag (expand-file-name (read-file-name "Path to asd file: " nil nil t))))

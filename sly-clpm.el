@@ -55,23 +55,31 @@
   "Locate dominating clpmfile."
   (concat (locate-dominating-file (buffer-file-name) "clpmfile") "clpmfile"))
 
+(defun sly-clpm--called-with-universal ()
+  "Return t if function is called with universal argument, else nil."
+  (eq (prefix-numeric-value current-prefix-arg) 4))
+
 (defun sly-clpm-bundle-init (clpmfile asd)
   "Initiate clpm in project
 CLPMFILE must be path to a non existing clpmfile and ASD is a list containing
 .asd files. Typically project root '(<projectname>.asd <projectname>-test.asd)."
   ;; TODO: Detect project .asd files automagically
   (interactive (list (expand-file-name (read-file-name "Path to clpmfile: " nil nil t))
-                     (let (tags tag)
+                     (let (files file)
                        (while (file-regular-p
-                                     (setq tag (expand-file-name (read-file-name "Path to asd file: " nil nil t))))
-                         (push tag tags))
-                       (nreverse tags))))
+                                     (setq file (expand-file-name (read-file-name "Path to asd file: " nil nil t))))
+                         (push file files))
+                       (nreverse files))))
   (sly-eval `(slynk-clpm:bundle-init clpmfile asd)))
 
 (defun sly-clpm-install-context (&optional clpmfile)
-  "Install clpm context.
-Looks for project root clpmfile if non is specified."
-  (interactive (list (expand-file-name (read-file-name "Path to clpmfile: " (sly-clpm--find-clpmfile)))))
+  "Install clpm context form clpmfile.
+Looks for project root clpmfile if non is specified.  Prompt for clpmfile when called
+interactively.  If universal argument is used when calling interactively the function
+uses the dominating / project root clpmfile."
+  (interactive (unless (sly-clpm--called-with-universal)
+                 (list (expand-file-name
+                        (read-file-name "Path to clpmfile: " (sly-clpm--find-clpmfile))))))
   (let ((context (or clpmfile (sly-clpm--find-clpmfile))))
     (when (sly-eval `(slynk-clpm:install-context ,context))
       (sly-message "context %s installed" context))))
@@ -93,9 +101,12 @@ Looks for project root clpmfile if non is specified."
 
 (defun sly-clpm-activate-context (&optional clpmfile)
   "Activate clpm context from clpmfile.
-Uses project root clpmfile if non is specified."
-  ;; (interactive "FPath to clpmfile")
-  (interactive (list (expand-file-name (read-file-name "Path to clpmfile: " (sly-clpm--find-clpmfile)))))
+Looks for project root clpmfile if non is specified.  Prompt for clpmfile when called
+interactively.  If universal argument is used when calling interactively the function
+uses the dominating / project root clpmfile."
+  (interactive (unless (sly-clpm--find-clpmfile)
+                 (list (expand-file-name
+                        (read-file-name "Path to clpmfile: " (sly-clpm--find-clpmfile))))))
   (let ((context (or clpmfile (sly-clpm--find-clpmfile))))
     (when context
       (sly-eval `(slynk-clpm:activate-context ,context))

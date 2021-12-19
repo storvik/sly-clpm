@@ -63,13 +63,8 @@
   "Initiate clpm in project
 CLPMFILE must be path to a non existing clpmfile and ASD is a list containing
 .asd files. Typically project root '(<projectname>.asd <projectname>-test.asd)."
-  ;; TODO: Detect project .asd files automagically
   (interactive (list (expand-file-name (read-file-name "Path to clpmfile: " nil nil t))
-                     (let (files file)
-                       (while (file-regular-p
-                                     (setq file (expand-file-name (read-file-name "Path to asd file: " nil nil t))))
-                         (push file files))
-                       (nreverse files))))
+                     (mapcar #'expand-file-name (completing-read-multiple "Path to .asd files: " #'read-file-name-internal))))
   (sly-eval `(slynk-clpm:bundle-init clpmfile asd)))
 
 (defun sly-clpm-install-context (&optional clpmfile)
@@ -85,9 +80,12 @@ uses the dominating / project root clpmfile."
       (sly-message "context %s installed" context))))
 
 ;; TODO Implement this
-(defun sly-clpm-install-from-asd (asd)
-  "Install system by using pointer to .asd file."
-  (interactive))
+(defun sly-clpm-install-system-from-asd (asd)
+  "Install system by using pointer to .asd file.
+ASD should be a list of files, typically '(<projectname>.asd and <projectname>-test.asd)."
+  (interactive (list (mapcar #'expand-file-name (completing-read-multiple "Path to .asd files: " #'read-file-name-internal))))
+  (when (sly-eval `(slynk-clpm:install-context ,context))
+      (sly-message "context %s installed" context)))
 
 (defun sly-clpm-install-from-source (project)
   "Install project from one of the configured sources."

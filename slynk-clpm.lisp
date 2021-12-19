@@ -11,6 +11,9 @@
 (defslyfun install-context (clpmfile)
   (clpm-client:install :context (pathname clpmfile)))
 
+(defslyfun install-system-from-file (asd)
+  (clpm-client:install :asds asd))
+
 (defslyfun active-context ()
   (let ((ctx (clpm-client:active-context)))
     (when ctx
